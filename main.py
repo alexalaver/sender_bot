@@ -20,9 +20,6 @@ class AddNumberPhone(StatesGroup):
     addnumber_3 = State()
     addnumber_4 = State()
 
-class Auth(StatesGroup):
-    wait_for_code = State()
-
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:
@@ -89,6 +86,7 @@ async def addnumber_2_text(message: types.Message, state: FSMContext):
             await message.answer("Информация получена, введите номер телефона: ")
             await AddNumberPhone.addnumber_3.set()
 
+
 @dp.message_handler(state=AddNumberPhone.addnumber_3)
 async def addnumber_3_text(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
@@ -113,13 +111,9 @@ async def addnumber_3_text(message: types.Message, state: FSMContext):
                         "Бот не подключен к серверам Telegram. Пожалуйста, подождите и попробуйте еще раз.")
                     return
 
-                # Отправляем запрос на аутентификацию и получаем phone_code_hash
-                phone_code_hash = await telethon_client.send_code_request(number)
-                # Сохраняем phone_code_hash в состоянии Auth
-                await state.update_data(phone_code_hash=phone_code_hash)
-
-                await message.answer("На ваш телеграм аккаунт отправлен код, введите его в чате бота: ")
-                await Auth.wait_for_code.set()
+                await telethon_client.send_code_request(number)
+                await message.answer("На ваш телеграм аккаунт отправлен код, введите: ")
+                await state.finish()
             except Exception as es:
                 await message.answer(
                     "Произошла ошибка, номер введен неверно, либо на данный номер не зарегистрирован аккаунт в Telegram!",
@@ -127,40 +121,31 @@ async def addnumber_3_text(message: types.Message, state: FSMContext):
                 db.delete_cashe_create(user_id)
                 await state.reset_state()
 
-@dp.message_handler(state=Auth.wait_for_code)
-async def process_code(message: types.Message, state: FSMContext):
+@dp.message_handler(state=AddNumberPhone.addnumber_4)
+async def addnumber_4_text(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
         user_id = message.from_user.id
-        code = message.text
-
-        # Получаем phone_code_hash из состояния Auth
-        data = await state.get_data()
-        phone_code_hash = data.get("phone_code_hash")
-
-        if not phone_code_hash:
-            await message.answer("Произошла ошибка. Пожалуйста, попробуйте еще раз.")
-            return
-
-        try:
-            cashe_create = db.select_cashe_create(user_id)
-            api_id = cashe_create[0]
-            api_hash = cashe_create[1]
-            number = cashe_create[2]
-            telethon_client = TelegramClient(number, api_id, api_hash)
-
-            # Аутентифицируем пользователя с полученным кодом
-            await telethon_client.sign_in(number, code, phone_code_hash)
-
-            # Теперь пользователь аутентифицирован
-            # Вы можете добавить его в базу данных или выполнить другие действия по вашему выбору
-
-            await message.answer("Вы успешно аутентифицировались!")
-            await state.finish()
-            db.delete_cashe_create(user_id)
-        except Exception as es:
-            await message.answer("Произошла ошибка, код введен неверно!", reply_markup=types.ReplyKeyboardRemove())
+        if message.text == "Отменить":
             db.delete_cashe_create(user_id)
             await state.reset_state()
+            await message.answer("Вы отменили добавление аккаунта.", reply_markup=types.ReplyKeyboardRemove())
+        else:
+            try:
+                cashe_create = db.select_cashe_create(user_id)
+                api_id = cashe_create[0]
+                api_hash = cashe_create[1]
+                number = cashe_create[2]
+                code = message.text
+                telethon_client = TelegramClient(number, api_id, api_hash)
+                await telethon_client.sign_in(number, code)
+                db.add_phones(user_id, number, api_id, api_hash)
+                await message.answer("Вы успешно добавили аккаунт!")
+                await state.finish()
+                db.delete_cashe_create(user_id)
+            except Exception as es:
+                await message.answer("Произошла ошибка, код ведён неверно!", reply_markup=types.ReplyKeyboardRemove())
+                db.delete_cashe_create(user_id)
+                await state.reset_state()
 
 @dp.message_handler()
 async def texts(message: types.Message):
