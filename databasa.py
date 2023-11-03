@@ -58,3 +58,8 @@ class Data:
             a = self.cursor.fetchone()
             b = [b for b in a]
             return b
+
+    def add_phones(self, id, api_id, api_hash, number_phone):
+        with self.connect:
+            self.cursor.execute("INSERT INTO phones (id, number_phone, api_id, api_hash) VALUES(%s, %s, %s, %s)", (id, number_phone, api_id, api_hash,))
+            self.connect.commit()

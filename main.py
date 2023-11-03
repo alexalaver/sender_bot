@@ -111,6 +111,31 @@ async def addnumber_3_text(message: types.Message, state: FSMContext):
                 db.delete_cashe_create(user_id)
                 await state.reset_state()
 
+@dp.message_handler(state=AddNumberPhone.addnumber_4)
+async def addnumber_4_text(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        user_id = message.from_user.id
+        if message.text == "Отменить":
+            db.delete_cashe_create(user_id)
+            await state.reset_state()
+            await message.answer("Вы отменили добавление аккаунта.", reply_markup=types.ReplyKeyboardRemove())
+        else:
+            try:
+                cashe_create = db.select_cashe_create(user_id)
+                api_id = cashe_create[0]
+                api_hash = cashe_create[1]
+                number = cashe_create[2]
+                code = message.text
+                telethon_client = TelegramClient(number, api_id, api_hash)
+                await telethon_client.sign_in(number, code)
+                db.add_phones(user_id, number, api_id, api_hash)
+                await message.answer("Вы успешно добавили аккаунт!")
+                await state.finish()
+            except Exception as es:
+                await message.answer("Произошла ошибка, код ведён неверно!", reply_markup=types.ReplyKeyboardRemove())
+                db.delete_cashe_create(user_id)
+                await state.reset_state()
+
 @dp.message_handler()
 async def texts(message: types.Message):
     if message.text == 't':
