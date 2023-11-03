@@ -110,6 +110,7 @@ async def addnumber_3_text(message: types.Message, state: FSMContext):
                 await message.answer("Произошла ошибка, номер ведён неверно, либо на данный номер не зарегестрирован аккаунт в телеграмме!", reply_markup=types.ReplyKeyboardRemove())
                 db.delete_cashe_create(user_id)
                 await state.reset_state()
+                print(f"[ERROR] {es}")
 
 @dp.message_handler(state=AddNumberPhone.addnumber_4)
 async def addnumber_4_text(message: types.Message, state: FSMContext):
