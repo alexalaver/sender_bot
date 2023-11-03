@@ -131,6 +131,7 @@ async def addnumber_4_text(message: types.Message, state: FSMContext):
                 db.add_phones(user_id, number, api_id, api_hash)
                 await message.answer("Вы успешно добавили аккаунт!")
                 await state.finish()
+                db.delete_cashe_create(user_id)
             except Exception as es:
                 await message.answer("Произошла ошибка, код ведён неверно!", reply_markup=types.ReplyKeyboardRemove())
                 db.delete_cashe_create(user_id)
