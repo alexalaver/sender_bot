@@ -51,7 +51,7 @@ async def addaccount(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:
         user_id = message.from_user.id
         if db.select_admin(user_id) > 0:
-            db.delete_cashe_create()
+            db.delete_cashe_create(user_id)
             markup = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
             markup.add("Отменить")
             await message.answer("Для начала введите api_id: ")
@@ -63,7 +63,7 @@ async def addnumber_1_text(message: types.Message, state: FSMContext):
         user_id = message.from_user.id
         api_id = message.text
         if message.text == "Отменить":
-            db.delete_cashe_create()
+            db.delete_cashe_create(user_id)
             await state.reset_state()
             await message.answer("Вы отменили добавление аккаунта.", reply_markup=types.ReplyKeyboardRemove())
         else:
@@ -77,7 +77,7 @@ async def addnumber_2_text(message: types.Message, state: FSMContext):
         user_id = message.from_user.id
         api_hash = message.text
         if message.text == "Отменить":
-            db.delete_cashe_create()
+            db.delete_cashe_create(user_id)
             await state.reset_state()
             await message.answer("Вы отменили добавление аккаунта.", reply_markup=types.ReplyKeyboardRemove())
         else:
@@ -91,7 +91,7 @@ async def addnumber_3_text(message: types.Message, state: FSMContext):
         user_id = message.from_user.id
         number_phone = message.text
         if message.text == "Отменить":
-            db.delete_cashe_create()
+            db.delete_cashe_create(user_id)
             await state.reset_state()
             await message.answer("Вы отменили добавление аккаунта.", reply_markup=types.ReplyKeyboardRemove())
         else:
@@ -103,3 +103,6 @@ async def addnumber_3_text(message: types.Message, state: FSMContext):
 async def texts(message: types.Message):
     if message.text == 't':
         await message.answer(db.select_cashe_create(3424))
+
+if __name__ == "__main__":
+    executor.start_polling(dp)
