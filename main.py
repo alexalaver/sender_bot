@@ -51,8 +51,6 @@ async def add_admin_user(message: types.Message):
 async def addaccounts(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:
         user_id = message.from_user.id
-        await message.answer("hello")
-        await message.answer(db.select_admin(user_id))
         if db.select_admin(user_id) > 0:
             markup = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
             markup.add("Отменить")
