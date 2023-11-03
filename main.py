@@ -51,12 +51,13 @@ async def add_admin_user(message: types.Message):
 async def addaccount(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:
         user_id = message.from_user.id
+        print("Hello")
         if db.select_admin(user_id) > 0:
-            db.delete_cashe_create(user_id)
             markup = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
             markup.add("Отменить")
-            await message.answer("Для начала введите api_id: ")
+            await message.answer("Для начала введите api_id: ", reply_markup=markup)
             await AddNumberPhone.addnumber_1.set()
+            db.delete_cashe_create(user_id)
 
 @dp.message_handler(state=AddNumberPhone.addnumber_1)
 async def addnumber_1_text(message: types.Message, state: FSMContext):
