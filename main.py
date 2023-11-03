@@ -48,10 +48,10 @@ async def add_admin_user(message: types.Message):
             await message.answer("Вам не доступна данная команда!")
 
 @dp.message_handler(commands=['addaccount'])
-async def addaccount(message: types.Message):
+async def addaccounts(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:
         user_id = message.from_user.id
-        print("Hello")
+        await message.answer("hello")
         if db.select_admin(user_id) > 0:
             markup = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
             markup.add("Отменить")
