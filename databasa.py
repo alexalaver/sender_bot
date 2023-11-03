@@ -56,6 +56,5 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT api_id, api_hash, number_phone FROM cashe_create WHERE id=%s", (id,))
             a = self.cursor.fetchone()
-            return a
-
-db = Data("192.168.1.37", "5432", "sender", "sender_user", "sender_pass")
+            b = [b for b in a]
+            return b
