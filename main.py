@@ -86,6 +86,7 @@ async def addnumber_2_text(message: types.Message, state: FSMContext):
             await message.answer("Информация получена, введите номер телефона: ")
             await AddNumberPhone.addnumber_3.set()
 
+
 @dp.message_handler(state=AddNumberPhone.addnumber_3)
 async def addnumber_3_text(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
@@ -96,20 +97,29 @@ async def addnumber_3_text(message: types.Message, state: FSMContext):
             await state.reset_state()
             await message.answer("Вы отменили добавление аккаунта.", reply_markup=types.ReplyKeyboardRemove())
         else:
-            db.update_cashe_create_number_phone(user_id, number_phone)
-            cashe_create = db.select_cashe_create(user_id)
-            api_id = cashe_create[0]
-            api_hash = cashe_create[1]
-            number = cashe_create[2]
-            telethon_client = TelegramClient(number, api_id, api_hash)
-            await telethon_client.send_code_request(number)
-            await message.answer("На ваш телеграмм аккаунт отправлен код, введите: ")
-            await state.finish()
-            # except Exception as es:
-            #     await message.answer("Произошла ошибка, номер ведён неверно, либо на данный номер не зарегестрирован аккаунт в телеграмме!", reply_markup=types.ReplyKeyboardRemove())
-            #     db.delete_cashe_create(user_id)
-            #     await state.reset_state()
-            #     print(f"[ERROR] {es}")
+            try:
+                db.update_cashe_create_number_phone(user_id, number_phone)
+                cashe_create = db.select_cashe_create(user_id)
+                api_id = cashe_create[0]
+                api_hash = cashe_create[1]
+                number = cashe_create[2]
+                telethon_client = TelegramClient(number, api_id, api_hash)
+
+                # Проверяем, что бот Telethon подключен к серверам Telegram
+                if not telethon_client.is_connected():
+                    await message.answer(
+                        "Бот не подключен к серверам Telegram. Пожалуйста, подождите и попробуйте еще раз.")
+                    return
+
+                await telethon_client.send_code_request(number)
+                await message.answer("На ваш телеграм аккаунт отправлен код, введите: ")
+                await state.finish()
+            except Exception as es:
+                await message.answer(
+                    "Произошла ошибка, номер введен неверно, либо на данный номер не зарегистрирован аккаунт в Telegram!",
+                    reply_markup=types.ReplyKeyboardRemove())
+                db.delete_cashe_create(user_id)
+                await state.reset_state()
 
 @dp.message_handler(state=AddNumberPhone.addnumber_4)
 async def addnumber_4_text(message: types.Message, state: FSMContext):
