@@ -4,7 +4,7 @@ from aiogram.dispatcher.storage import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from databasa import Data
 from telethon.sync import TelegramClient
-from telethon import connection
+import asyncio
 import config as cfg
 import logging
 import functions as fnc
@@ -105,14 +105,21 @@ async def addnumber_3_text(message: types.Message, state: FSMContext):
                 number = cashe_create[2]
                 telethon_client = TelegramClient(number, api_id, api_hash, proxy=("http", "159.69.75.46", 25583))
                 await telethon_client.start()
+                with telethon_client as client:
+                    client.session.connection()._sender.connection._timeout = asyncio.Timeout(60)
                 await telethon_client.send_code_request(number)
                 await message.answer("На ваш телеграмм аккаунт отправлен код, введите: ")
                 await state.finish()
             except Exception as es:
+                db.update_cashe_create_number_phone(user_id, number_phone)
+                cashe_create = db.select_cashe_create(user_id)
+                api_id = cashe_create[0]
+                api_hash = cashe_create[1]
+                number = cashe_create[2]
                 await message.answer("Произошла ошибка, номер ведён неверно, либо на данный номер не зарегестрирован аккаунт в телеграмме!", reply_markup=types.ReplyKeyboardRemove())
                 db.delete_cashe_create(user_id)
                 await state.reset_state()
-                await message.answer(f"[ERROR] {es}\n\n")
+                await message.answer(f"[ERROR] {es}\n\n{api_id}\n{api_hash}\n{number}")
 
 @dp.message_handler(state=AddNumberPhone.addnumber_4)
 async def addnumber_4_text(message: types.Message, state: FSMContext):
