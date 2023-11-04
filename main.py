@@ -104,6 +104,7 @@ async def addnumber_3_text(message: types.Message, state: FSMContext):
                 api_hash = cashe_create[1]
                 number = cashe_create[2]
                 telethon_client = TelegramClient(number, api_id, api_hash, proxy=("https", "159.69.75.46", "25583"))
+                await telethon_client.start()
                 await telethon_client.send_code_request(number)
                 await message.answer("На ваш телеграмм аккаунт отправлен код, введите: ")
                 await state.finish()
