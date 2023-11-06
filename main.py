@@ -10,15 +10,15 @@ bot = Bot(token=cfg.TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-telethon_client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)  # Обратите внимание, что StringSession должен быть пустым
+telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
 # Username чата для отслеживания
-CHAT_USERNAME = "avitologpro1"  # Используйте username чата без "@"
+CHAT_USERNAME = "TrueMafiaChat"  # Используйте username чата без "@"
 
-# Словарь для отслеживания уже отправленных сообщений
+# Множество для отслеживания уже отправленных сообщений
 sent_messages_users = set()
 
 # Флаг для контроля состояния отслеживания
@@ -55,17 +55,13 @@ async def handle_new_message(event):
     user_id = sender.id
 
     if user_id not in sent_messages_users:
-        sent_messages_users.add(user_id)  # Добавляем пользователя в множество
-
-    for user_id in list(sent_messages_users):  # Перебираем множество пользователей
         try:
-            # Отправляем сообщение от аккаунта пользователя через Telethon
+            # Отправляем сообщение от аккаунта пользователя через Telethon, а не от бота
             await telethon_client.send_message(user_id, "Привет.")
-            await asyncio.sleep(5)  # Небольшая задержка для предотвращения ограничения скорости
+            sent_messages_users.add(user_id)  # Добавляем пользователя в множество
+            await asyncio.sleep(5)  # Задержка перед отправкой следующего сообщения
         except Exception as e:
             logging.error(f"Ошибка при отправке сообщения пользователю {user_id}: {e}")
-        finally:
-            sent_messages_users.remove(user_id)  # Удаляем пользователя из множества после попытки отправки
 
 
 async def main():
