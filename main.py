@@ -10,7 +10,7 @@ bot = Bot(token=cfg.TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-with TelegramClient("my_session", cfg.PI_ID, cfg.API_HASH) as client:
+with TelegramClient("my_session", cfg.API_ID, cfg.API_HASH) as client:
     print("Ваша строка сессии:", client.session.save())
 
 
