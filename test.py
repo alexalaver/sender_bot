@@ -12,7 +12,7 @@ dp = Dispatcher(bot)
 api_id = 'YOUR_API_ID'
 api_hash = 'YOUR_API_HASH'
 session_name = 'name'
-telethon_client = TelegramClient(phone_number, api_id, api_hash)
+telethon_client = TelegramClient(number, api_id, api_hash)
 
 # Инициализация логгера
 logging.basicConfig(level=logging.INFO)
@@ -34,19 +34,15 @@ async def process_phone(message: types.Message):
         await message.answer(f"Ошибка при отправке кода подтверждения: {str(e)}")
 
 async def process_code(message: types.Message):
-    code = message.text.strip()
-    try:
-        await telethon_client.sign_in(phone_number, code)
-        # Вы можете использовать переменные 'phone_number' и 'code' в функции /send_message
-        user_username = ['@alexalaver', '@developadm']
-        message_text = 'Ваше сообщение'
-        for users in user_username:
-            user = await telethon_client.get_entity(users)
-            await telethon_client.send_message(user, message_text)
-        await telethon_client.disconnect()
-        await message.answer("Сообщение успешно отправлено")
-    except Exception as e:
-        await message.answer(f"Ошибка при вводе кода подтверждения: {str(e)}")
+    user_username = ['@alexalaver', '@developadm']
+    message_text = 'Добрый вечер'
+    await telethon_client.start()
+    for users in user_username:
+        user = await telethon_client.get_entity(users)
+        await telethon_client.send_message(user, message_text)
+    await telethon_client.disconnect()
+    await message.answer("Сообщение успешно отправлено")
+
 
 if __name__ == '__main__':
     executor.start_polling(dp, on_startup=None)
