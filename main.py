@@ -16,7 +16,7 @@ telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, 
 logging.basicConfig(level=logging.INFO)
 
 # Username чата для отслеживания
-CHAT_USERNAME = "mediapartisanschat"  # Используйте username чата без "@"
+CHAT_USERNAME = "avitologpro1"  # Используйте username чата без "@"
 
 # Множество для отслеживания уже отправленных сообщений
 sent_messages_users = set()
@@ -59,7 +59,7 @@ async def handle_new_message(event):
             # Отправляем сообщение от аккаунта пользователя через Telethon, а не от бота
             await telethon_client.send_message(user_id, "Привет.")
             sent_messages_users.add(user_id)  # Добавляем пользователя в множество
-            await asyncio.sleep(15)  # Задержка перед отправкой следующего сообщения
+            await asyncio.sleep(5)  # Задержка перед отправкой следующего сообщения
         except Exception as e:
             logging.error(f"Ошибка при отправке сообщения пользователю {user_id}: {e}")
 
