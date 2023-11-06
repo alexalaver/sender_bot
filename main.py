@@ -10,8 +10,7 @@ bot = Bot(token=cfg.TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-telethon_client = TelegramClient(StringSession(), cfg.API_ID,
-                                 cfg.API_HASH)  # Обратите внимание, что StringSession должен быть пустым
+telethon_client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)  # Обратите внимание, что StringSession должен быть пустым
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
