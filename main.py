@@ -62,7 +62,7 @@ async def handle_new_message(event):
         try:
             # Отправляем сообщение от аккаунта пользователя через Telethon
             await telethon_client.send_message(user_id, "Привет.")
-            await asyncio.sleep(0.1)  # Небольшая задержка для предотвращения ограничения скорости
+            await asyncio.sleep(5)  # Небольшая задержка для предотвращения ограничения скорости
         except Exception as e:
             logging.error(f"Ошибка при отправке сообщения пользователю {user_id}: {e}")
         finally:
